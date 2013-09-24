@@ -4,6 +4,7 @@ from base64 import b64decode, b64encode
 import datetime
 import hashlib
 import hmac
+import itertools
 import logging
 import pickle
 import os
@@ -87,6 +88,14 @@ class Session(object):
         key = base_key + sid
         return b64encode(hmac.new(key, text, hashlib.sha256).digest())
 
+    @staticmethod
+    def __equals_slowly(a, b):
+        """Checks for equality in constant time to avoid possible timing attacks"""
+        diff = len(a) ^ len(b)
+        for ca, cb in itertools.izip(a, b):
+            diff |= ord(ca) ^ ord(cb)
+        return not diff
+
     def __read_cookie(self):
         """Reads the HTTP Cookie and loads the sid and data from it (if any)."""
         try:
@@ -101,7 +110,7 @@ class Session(object):
             sig, sid, b64pdump = data[:SIG_LEN], data[SIG_LEN:i], data[i:]
             pdump = b64decode(b64pdump)
             actual_sig = Session.__compute_hmac(self.base_key, sid, pdump)
-            if sig == actual_sig:
+            if Session.__equals_slowly(sig, actual_sig):
                 self.__set_sid(sid, False)
                 # check for expiration and terminate the session if it has expired
                 if self.get_expiration() != 0 and time.time() > self.get_expiration():
