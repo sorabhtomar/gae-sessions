@@ -5,7 +5,7 @@ from gaesessions import SessionMiddleware
 # this file.  If you use os.urandom() to *dynamically* generate your key at
 # runtime then any existing sessions will become junk every time you start,
 # deploy, or update your app!
-import os
+
 COOKIE_KEY = 'do not use this key'
 
 def webapp_add_wsgi_middleware(app):

@@ -20,7 +20,7 @@
     <tr><th>During this sign-on</td>   <td>{{ num_now }}</td></tr>
   </table>
 {% else %}
-  {{ login_form }}
+  {{ login_form|safe }}
 {% endif %}
 </div>
 
